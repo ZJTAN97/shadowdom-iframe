@@ -2,33 +2,26 @@
 
 ## Context
 
-We are building a news reading application where external news content (HTML, CSS, and JavaScript produced by a separate internal team) needs to be embedded into a React host application. This document captures the evaluation process and decision rationale for choosing between iframe and Shadow DOM as the embedding strategy.
+A reading application where external news content (HTML, CSS, and JavaScript produced by a separate internal team) needs to be embedded into a React host application. This document captures the evaluation process and decision rationale for choosing between iframe and Shadow DOM as the embedding strategy.
 
 ## Requirements
 
-We are building a news reading application where external news content (HTML, CSS, and JavaScript produced by a separate internal team) needs to be embedded into a React host application.
-
-Key requirements:
 1. Must be able to run JS
 2. Can prevent bleeding of parent app's CSS into product
-3. Ideally can interact with product's html easily. (with iframe the pain is having to inject js into the iframe and retrieve the output in the parent / react app before firing things like telemetry to BE)
-4. Can integrate with Table Of Contents (TOC)
-5. Must integrate with Digital Production
+3. Ideally can interact with product's html easily.
+4. Can integrate with Table Of Contents (TOC) (**this will most likely need to be handled by upstream, Digital Production?)
+5. Must integrate with Digital Production (**need to clarify what this means actually)
 6. Content source: External team (same org, trustable-ish). API contract is negotiable but not fully enforceable.
-7. Content complexity: HTML article markup + opinionated CSS + light JS (DOM manipulation, scroll tracking, analytics calls to our backend)
-8. Embed count: One article at a time (reading view)
-9. DOM accessibility: Very important — Cmd+F (find-on-page) and screen reader access must work
-10. Security isolation: Not required — same org, trusted content (most likely, fight me if wrong)
-11. JS scope: Light — no heavy framework, no reliance on `window`/`localStorage`/cookies. Some `document.querySelector` usage.
-12. Future interactions: Bidirectional host-to-article interaction on the roadmap (dark mode toggling, text annotation, highlighting)
+7. DOM accessibility: Very important — Ctrl+F (find-on-page) and screen reader access must work
+8. Future interactions: Bidirectional host-to-product interaction on the roadmap (dark mode toggling, text annotation, highlighting)
 
 ## Evaluation Approach
 
 Both approaches were prototyped in a pnpm monorepo with Vite 8 + React 19 + TypeScript to ensure that it aligns with the current technology stack:
 
-```
+```md
 shadowdom-iframe/
-├── shared/news-content/         # Shared external article (HTML/CSS/JS)
+├── shared/news-content/         # Shared external mock product (HTML/CSS/JS)
 ├── packages/iframe-example/     # iframe approach — port 5173
 └── packages/shadow-dom-example/ # Shadow DOM approach — port 5174
 ```
@@ -36,11 +29,36 @@ shadowdom-iframe/
 Both POCs embed the same external news article and demonstrate:
 - Style isolation (host app uses conflicting global styles)
 - Event communication (share/bookmark buttons fire events to the host)
-- Bidirectional interaction (dark mode toggle from host into article)
+- Bidirectional interaction (dark mode toggle from host into product)
+
+## Introduction to Shadow DOM
+
+The Shadow DOM is a web standard designed to provide encapsulation in web development. It allows developers to create a private, isolated DOM tree within an element, ensuring that the internal structure, styles, and behavior of a component do not interfere with—and are not affected by—the rest of the web page.
+
+Some terminologies:
+- Shadow Tree: The hidden DOM tree inside the Shadow DOM.
+- Shadow Boundary: The line where the Shadow DOM ends and the regular DOM begins.
+- Shadow Root: The starting node of the internal tree.
+
+```js
+// 1. Select the host element
+const host = document.querySelector('#host-element');
+
+// 2. Attach a shadow root (mode: 'open' allows access via JS if needed)
+const shadow = host.attachShadow({ mode: 'open' });
+
+// 3. Add internal content and styles
+shadow.innerHTML = `
+  <style>
+    p { color: red; font-weight: bold; } /* Only affects <p> inside this shadow */
+  </style>
+  <p>I am protected by the Shadow DOM!</p>
+`;
+```
 
 ## Detailed Comparison
 
-### Style Isolation
+### 1. Style Isolation
 
 Both approaches fully isolate the article's opinionated CSS (serif fonts, color resets, aggressive `*` selectors) from the host app's sans-serif styling.
 
@@ -50,7 +68,7 @@ Both approaches fully isolate the article's opinionated CSS (serif fonts, color 
 | Effectiveness | Complete — no leakage possible | Complete — styles don't cross the boundary |
 | Verdict       | Equivalent                     | Equivalent                                 |
 
-### JavaScript Isolation
+### 2. JavaScript Isolation
 
 |               | iframe                                   | Shadow DOM                                                                                      |
 | ------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -58,9 +76,12 @@ Both approaches fully isolate the article's opinionated CSS (serif fonts, color 
 | DOM scoping   | Automatic — JS scoped to iframe document | Requires adaptation — `document.querySelector` must be redirected to `shadowRoot.querySelector` |
 | Global access | Fully isolated                           | JS can access host `window`, globals                                                            |
 
-**For our case:** Security isolation is not required (trusted same-org team). The external JS is light and the API contract is partially negotiable, so scoping `document.querySelector` calls is manageable. The regex-based scoping shim in the POC works for the current content but is fragile — a better long-term approach is to negotiate an init contract with the external team where they receive a root element and scope all queries to it.
 
-### Communication & Events
+**For our case:** Security isolation is not required (trusted same-org team). The external JS is light and the API contract is partially negotiable, so scoping `document.querySelector` calls is manageable. 
+
+### 3. Communication & Events
+
+**Note to readers: Dive into the code examples to better understand and feel the differences in DX when implementing JS related requirements for embedded documents.
 
 |                   | iframe                                                                     | Shadow DOM                                                             |
 | ----------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -75,12 +96,13 @@ iframe required:
 2. A `useEffect` in React to `postMessage({ type: 'set-dark-mode', enabled })` to the iframe
 3. Both sides agreeing on the message format
 
+**Every future bidirectional feature (annotations, highlighting, theming) multiplies this DX gap.**
+
 Shadow DOM required:
 1. A `useEffect` in React: `shadowRoot.querySelector('.news-article')?.classList.toggle('dark-mode', darkMode)` — 3 lines, no protocol.
 
-**Every future bidirectional feature (annotations, highlighting, theming) multiplies this DX gap.**
 
-### Layout & Sizing
+### 4. Layout & Sizing
 
 |                 | iframe                                                          | Shadow DOM                                 |
 | --------------- | --------------------------------------------------------------- | ------------------------------------------ |
@@ -89,7 +111,8 @@ Shadow DOM required:
 
 Shadow DOM eliminates the height-syncing boilerplate entirely.
 
-### DOM Accessibility (Cmd+F, Screen Readers)
+
+### 5. DOM Accessibility (Cmd+F, Screen Readers)
 
 |                      | iframe                                   | Shadow DOM                               |
 | -------------------- | ---------------------------------------- | ---------------------------------------- |
@@ -99,7 +122,8 @@ Shadow DOM eliminates the height-syncing boilerplate entirely.
 
 **Note:** Initial assumption that Cmd+F wouldn't work in iframes was incorrect — `srcdoc` iframes are same-origin, so browser find-on-page searches into them. Both approaches are equivalent here for our use case. However, if the content were served cross-origin, iframe would lose this capability.
 
-### Performance
+
+### 6. Performance
 
 |                  | iframe                                 | Shadow DOM                                |
 | ---------------- | -------------------------------------- | ----------------------------------------- |
@@ -109,33 +133,65 @@ Shadow DOM eliminates the height-syncing boilerplate entirely.
 
 With only one article at a time, the performance difference is negligible.
 
+
 ## Decision Matrix
 
-| Factor                                      | Weight        | iframe                           | Shadow DOM             | Winner         |
-| ------------------------------------------- | ------------- | -------------------------------- | ---------------------- | -------------- |
-| Style isolation                             | High          | Full                             | Full                   | Tie            |
-| DX for bidirectional interaction            | High          | postMessage protocol per feature | Direct DOM access      | **Shadow DOM** |
-| Future extensibility (annotations, theming) | High          | Linear protocol growth           | Standard DOM APIs      | **Shadow DOM** |
-| Layout integration                          | Medium        | Requires height syncing          | Natural flow           | **Shadow DOM** |
-| JS scoping simplicity                       | Medium        | Automatic                        | Requires shim/contract | **iframe**     |
-| DOM accessibility (Cmd+F, a11y)             | High          | Works (same-origin)              | Works                  | Tie            |
-| Security isolation                          | Low (trusted) | Full                             | Partial                | N/A            |
-| Performance                                 | Low (1 embed) | Heavier                          | Lighter                | N/A            |
+| Factor                                      | Weight        | iframe                                                 | Shadow DOM        | Winner         |
+| ------------------------------------------- | ------------- | ------------------------------------------------------ | ----------------- | -------------- |
+| Style isolation                             | High          | Full                                                   | Full              | Tie            |
+| DX for bidirectional interaction            | High          | postMessage protocol per feature (worst case scenario) | Direct DOM access | **Shadow DOM** |
+| Future extensibility (annotations, theming) | High          | Linear protocol growth                                 | Standard DOM APIs | **Shadow DOM** |
+| Layout integration                          | Medium        | Requires height syncing                                | Natural flow      | **Shadow DOM** |
+| JS scoping simplicity                       | Medium        | Automatic                                              | Requires scoping  | **iframe**     |
+| DOM accessibility (Cmd+F, a11y)             | High          | Works (same-origin)                                    | Works             | Tie            |
+| Security isolation                          | Low (trusted) | Full                                                   | Partial           | N/A            |
+| Performance                                 | Low (1 embed) | Heavier                                                | Lighter           | N/A            |
 
-## Decision
 
-**Shadow DOM** is the recommended approach for this project.
+## Final Decision & Recommendation
+
+I personally recommend **Shadow DOM** as the approach for our use case.
 
 ### Primary reasons
-1. **Bidirectional interaction DX** — direct DOM access is dramatically simpler than postMessage protocols, and this gap widens with every new feature (dark mode, annotations, highlighting, theming)
+1. **Bidirectional interaction DX** — direct DOM access is dramatically simpler than postMessage protocols (granted, this is worst case scenario for iframe), and this gap widens with every new feature (dark mode, annotations, highlighting, theming)
 2. **Natural layout flow** — no height-syncing boilerplate
-3. **Future-friendly** — standard DOM APIs mean new features don't require building messaging infrastructure
+3. **Future-friendly** — standard DOM APIs mean new features don't require building messaging infrastructure in the event theres cross origin resource.
 
 ### Accepted tradeoffs
 - **JS scoping requires adaptation** — external content's `document.querySelector` calls must be redirected to the shadow root. Short-term: regex shim. Long-term: negotiate an init contract with the external team (`init(rootElement)` pattern where all DOM queries scope to the provided root).
 - **`position: fixed` behaves differently** — fixed-position elements inside shadow DOM position relative to the shadow host, not the viewport. The external team should avoid fixed overlays, or we adapt case-by-case. This is acceptable.
 - **No JS isolation** — external JS runs in the same `window` context. Acceptable because the content is from a trusted internal team.
 
-### Recommended next steps
+### Probable Next Steps
 1. Define an init contract with the external team: `initArticle(rootElement: HTMLElement)` where all DOM access is scoped to `rootElement`
 2. Build out the Shadow DOM integration layer as a reusable React component
+
+
+## Things to find out / follow up
+
+- get the full product file from YY
+
+- CSS Variables will it bleed?
+
+```css
+var(--color-black);
+```
+
+- handling of video
+  - do a poc on it
+  - see whether the paint process gets stuck
+
+- If TOC has to be handled by host App how should it be handled by shadowdom and iframe
+  - mock the json response and render directly from host app
+
+- bubbling events from shadow dom to host app
+
+- continuous (just purely rely on intersection observer)
+
+- how does it handle `body` and `head` tags, right now is just rendered as string on the DOM.
+
+- try directly in OA Dev
+
+- **by Wednesday 15th April**
+
+

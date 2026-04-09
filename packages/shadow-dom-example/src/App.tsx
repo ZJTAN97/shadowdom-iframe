@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
-import { NewsEmbed } from "./components/NewsEmbed";
 import { bookmarkArticle } from "./api/progress";
+import { NewsEmbed } from "./components/NewsEmbed";
 import { useReadProgress } from "./hooks/use-read-progress";
 
 function App() {

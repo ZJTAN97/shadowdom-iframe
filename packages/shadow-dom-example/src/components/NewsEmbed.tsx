@@ -10,7 +10,11 @@ interface NewsEmbedProps {
 	onBookmark?: (articleId: string) => Promise<void>;
 }
 
-export function NewsEmbed({ onShadowReady, darkMode, onBookmark }: NewsEmbedProps) {
+export function NewsEmbed({
+	onShadowReady,
+	darkMode,
+	onBookmark,
+}: NewsEmbedProps) {
 	const { hostRef, shadowRef } = useShadowDom({
 		html: articleHtml,
 		css: articleCss,
@@ -29,7 +33,10 @@ export function NewsEmbed({ onShadowReady, darkMode, onBookmark }: NewsEmbedProp
 		const shadow = shadowRef.current;
 		if (!shadow) return;
 		const article = shadow.querySelector(".news-article");
-		article?.classList.toggle("dark-mode", !!darkMode);
+
+		if (article) {
+			article.classList.toggle("dark-mode", !!darkMode);
+		}
 	}, [shadowRef, darkMode]);
 
 	// Bind host API call directly to the bookmark button in the shadow DOM.

@@ -9,7 +9,11 @@ interface NewsEmbedProps {
 	onBookmark?: (articleId: string) => Promise<void>;
 }
 
-export function NewsEmbed({ onNewsAction, darkMode, onBookmark }: NewsEmbedProps) {
+export function NewsEmbed({
+	onNewsAction,
+	darkMode,
+	onBookmark,
+}: NewsEmbedProps) {
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const [height, setHeight] = useState(600);
 
@@ -114,6 +118,8 @@ export function NewsEmbed({ onNewsAction, darkMode, onBookmark }: NewsEmbedProps
 		);
 	}, [darkMode]);
 
+	console.log(iframeRef.current?.contentDocument);
+
 	useEffect(() => {
 		async function handleMessage(event: MessageEvent) {
 			if (event.data?.type === "resize") {
@@ -124,7 +130,10 @@ export function NewsEmbed({ onNewsAction, darkMode, onBookmark }: NewsEmbedProps
 				// Host makes the API call, then notifies the iframe so it can update its UI.
 				// Roundtrip postMessage is required because the host has no direct DOM access.
 				await onBookmark(event.data.articleId);
-				iframeRef.current?.contentWindow?.postMessage({ type: "bookmark-saved" }, "*");
+				iframeRef.current?.contentWindow?.postMessage(
+					{ type: "bookmark-saved" },
+					"*",
+				);
 			}
 		}
 
@@ -143,7 +152,8 @@ export function NewsEmbed({ onNewsAction, darkMode, onBookmark }: NewsEmbedProps
 				display: "block",
 			}}
 			title="Embedded news article"
-			sandbox="allow-scripts"
+			// sandbox="allow-scripts"
+			sandbox="allow-scripts allow-same-origin"
 		/>
 	);
 }
