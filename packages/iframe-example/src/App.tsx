@@ -1,6 +1,28 @@
+import {
+	ActionIcon,
+	Box,
+	Button,
+	Container,
+	Group,
+	Paper,
+	Progress,
+	ScrollArea,
+	Stack,
+	Text,
+} from "@mantine/core";
+import { useMantineColorScheme } from "@mantine/core";
+import {
+	IconArrowLeft,
+	IconMoon,
+	IconSun,
+	IconThumbUp,
+	IconTypography,
+	IconUsers,
+} from "@tabler/icons-react";
 import { useCallback, useState } from "react";
-import { NewsEmbed } from "./components/NewsEmbed";
+import classes from "./App.module.css";
 import { bookmarkArticle } from "./api/progress";
+import { NewsEmbed } from "./components/NewsEmbed";
 import { useReadProgress } from "./hooks/use-read-progress";
 
 interface EventLogEntry {
@@ -10,8 +32,9 @@ interface EventLogEntry {
 
 function App() {
 	const [events, setEvents] = useState<EventLogEntry[]>([]);
-	const [darkMode, setDarkMode] = useState(false);
 	const [isRead, setIsRead] = useState(false);
+	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+	const isDark = colorScheme === "dark";
 	const { percentage } = useReadProgress("AA/123/1234/ZZ");
 	const isComplete = percentage === 100;
 
@@ -34,121 +57,86 @@ function App() {
 	);
 
 	return (
-		<div className={`app${darkMode ? " app-dark" : ""}`}>
-			{/* Article header toolbar — part of the host React app, NOT in the iframe */}
-			<header className="article-toolbar">
-				<div
-					className={`toolbar-progress-bar${isComplete ? " toolbar-progress-bar--complete" : ""}`}
-					style={{ width: `${percentage}%` }}
+		<Container size="md" p={0}>
+			<Box component="header" className={classes.toolbar}>
+				<Progress
+					value={percentage}
+					size={3}
+					color={isComplete ? "green" : "blue.7"}
+					className={classes.progressBar}
 				/>
-				<button className="toolbar-btn toolbar-back" type="button">
-					<span className="toolbar-back-arrow">&larr;</span> Back
-				</button>
-				<div className="toolbar-actions">
-					<button
-						className="toolbar-btn toolbar-icon"
-						type="button"
-						title="People"
-					>
-						<svg
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							aria-label="People"
-						>
-							<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-							<circle cx="9" cy="7" r="4" />
-							<path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-							<path d="M16 3.13a4 4 0 0 1 0 7.75" />
-						</svg>
-					</button>
-					<button
-						className="toolbar-btn toolbar-icon"
-						type="button"
-						title="Font size"
-					>
-						<svg
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							aria-label="Font size"
-						>
-							<polyline points="4 7 4 4 20 4 20 7" />
-							<line x1="9" y1="20" x2="15" y2="20" />
-							<line x1="12" y1="4" x2="12" y2="20" />
-						</svg>
-					</button>
-					<button
-						className="toolbar-btn toolbar-icon"
-						type="button"
-						title="Like"
-					>
-						<svg
-							width="20"
-							height="20"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							aria-label="Like"
-						>
-							<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
-						</svg>
-					</button>
-					<button
-						className={`toolbar-btn toolbar-mark-read${isRead || isComplete ? " toolbar-mark-read--active" : ""}`}
-						type="button"
+				<Button
+					variant="subtle"
+					leftSection={<IconArrowLeft size={18} />}
+					size="compact-sm"
+				>
+					Back
+				</Button>
+				<Group gap="xs">
+					<ActionIcon variant="subtle" color="gray" title="People">
+						<IconUsers size={20} />
+					</ActionIcon>
+					<ActionIcon variant="subtle" color="gray" title="Font size">
+						<IconTypography size={20} />
+					</ActionIcon>
+					<ActionIcon variant="subtle" color="gray" title="Like">
+						<IconThumbUp size={20} />
+					</ActionIcon>
+					<Button
+						size="compact-sm"
+						fw={600}
+						color={isRead || isComplete ? "green" : "blue.7"}
 						onClick={() => setIsRead((r) => !r)}
 					>
 						{isRead || isComplete
 							? "✓ Read"
 							: `Mark Read${percentage > 0 ? ` (${percentage}%)` : ""}`}
-					</button>
-					<button
-						className="toolbar-btn toolbar-dark-toggle"
-						type="button"
-						onClick={() => setDarkMode((d) => !d)}
+					</Button>
+					<ActionIcon
+						variant="subtle"
+						color="gray"
+						onClick={() => toggleColorScheme()}
+						title="Toggle dark mode"
 					>
-						{darkMode ? "☀" : "☾"}
-					</button>
-				</div>
-			</header>
+						{isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
+					</ActionIcon>
+				</Group>
+			</Box>
 
-			<div className="app-content">
-				<div className="embed-container">
-					<NewsEmbed onNewsAction={handleNewsAction} darkMode={darkMode} onBookmark={handleBookmark} />
-				</div>
+			<Stack gap={0}>
+				<Box className={classes.embedContainer}>
+					<NewsEmbed
+						onNewsAction={handleNewsAction}
+						darkMode={isDark}
+						onBookmark={handleBookmark}
+					/>
+				</Box>
 
-				<div className="event-log">
-					<h2>Event Log (postMessage from iframe)</h2>
-					<div className="event-log-entries">
+				<Paper p="lg" radius={0} className={classes.eventLog}>
+					<Text size="lg" fw={600} mb="md">
+						Event Log (postMessage from iframe)
+					</Text>
+					<ScrollArea h={200}>
 						{events.length === 0 ? (
-							<div className="event-log-empty">
+							<Text c="dimmed" fs="italic">
 								Interact with the article to see events...
-							</div>
+							</Text>
 						) : (
 							events.map((e, i) => (
-								<div key={i} className="event-log-entry">
-									<strong>{e.timestamp}</strong> {e.message}
-								</div>
+								<Box key={i} py={6} className={classes.eventEntry}>
+									<Text span fw={700}>
+										{e.timestamp}
+									</Text>{" "}
+									<Text span size="sm" ff="monospace">
+										{e.message}
+									</Text>
+								</Box>
 							))
 						)}
-					</div>
-				</div>
-			</div>
-		</div>
+					</ScrollArea>
+				</Paper>
+			</Stack>
+		</Container>
 	);
 }
 
