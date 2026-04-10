@@ -362,33 +362,6 @@ a:hover {
 	color: #555;
 }
 
-/* ===== Back to Top ===== */
-.back-to-top {
-	position: fixed;
-	right: 2rem;
-	top: 50%;
-	transform: translateY(-50%);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.25rem;
-	font-family:
-		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	font-size: 0.7rem;
-	color: #888;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-.back-to-top:hover {
-	color: #333;
-	text-decoration: none;
-}
-
-.back-to-top-icon {
-	font-size: 1.5rem;
-	line-height: 1;
-}
 
 /* ===== Dark Mode ===== */
 .news-article.dark-mode {

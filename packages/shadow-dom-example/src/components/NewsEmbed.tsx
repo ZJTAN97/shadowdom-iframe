@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import {
 	IconArrowLeft,
+	IconArrowUp,
 	IconMoon,
 	IconSun,
 	IconThumbUp,
@@ -160,6 +161,17 @@ export function NewsEmbed() {
 					<TocSidebar shadowRef={shadowRef} />
 				</div>
 			</Container>
+			{percentage > 10 ? (
+				<Box
+					className={classes.backToTop}
+					onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+				>
+					<IconArrowUp size={18} color="var(--mantine-color-dimmed)" />
+					<Text size="xs" c="dimmed">
+						Back to top
+					</Text>
+				</Box>
+			) : null}
 		</div>
 	);
 }
