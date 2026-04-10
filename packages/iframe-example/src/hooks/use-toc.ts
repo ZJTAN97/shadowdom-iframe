@@ -1,5 +1,5 @@
 import { type RefObject, useCallback, useEffect, useState } from "react";
-import type { TocEntry } from "../../../../shared/components/TocSidebar/TocSidebar";
+import type { TocEntry } from "../components/TocSidebar";
 
 interface TocSectionData extends TocEntry {
 	offsetTop: number;

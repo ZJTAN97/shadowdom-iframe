@@ -20,7 +20,7 @@ import {
 	IconUsers,
 } from "@tabler/icons-react";
 import { useCallback, useRef, useState } from "react";
-import { TocSidebar } from "../../../shared/components/TocSidebar/TocSidebar";
+import { TocSidebar } from "./components/TocSidebar";
 import classes from "./App.module.css";
 import { bookmarkArticle } from "./api/progress";
 import { NewsEmbed } from "./components/NewsEmbed";

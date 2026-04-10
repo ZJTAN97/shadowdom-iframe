@@ -16,9 +16,9 @@ import {
 	IconUsers,
 } from "@tabler/icons-react";
 import { useRef, useState } from "react";
-import { TocSidebar } from "../../../shared/components/TocSidebar/TocSidebar";
 import classes from "./App.module.css";
 import { NewsEmbed } from "./components/NewsEmbed";
+import { TocSidebar } from "./components/TocSidebar";
 import { useReadProgress } from "./hooks/use-read-progress";
 
 function App() {

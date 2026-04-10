@@ -26,9 +26,8 @@ export function NewsEmbed({ onShadowReady, darkMode }: NewsEmbedProps) {
 		shadowRef.current = shadow;
 
 		// Inject styles
-		styleRef.current.textContent = `${css} section { scroll-margin-top: 70px; }`;
+		styleRef.current.textContent = `${css} section { scroll-margin-top: 75px; }`;
 
-		console.log(css);
 		shadow.appendChild(styleRef.current);
 
 		// Inject HTML
