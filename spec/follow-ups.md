@@ -94,3 +94,5 @@ If you are rendering a full document string inside a Shadow DOM, the browser eff
 I can actually use mantine's css Variables.
 
 But actually I don't see how this will be an issue.
+
+Found out that styles implemented on elements like `<main>` will be inherited by the shadow dom as well.
