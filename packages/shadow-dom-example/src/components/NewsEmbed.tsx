@@ -1,21 +1,40 @@
-import { Flex } from "@mantine/core";
+import {
+	ActionIcon,
+	Box,
+	Button,
+	Container,
+	Flex,
+	Group,
+	Progress,
+	useMantineColorScheme,
+} from "@mantine/core";
+import {
+	IconArrowLeft,
+	IconMoon,
+	IconSun,
+	IconThumbUp,
+	IconTypography,
+	IconUsers,
+} from "@tabler/icons-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import css from "../../../../shared/news-content/article.css?raw";
 import html from "../../../../shared/news-content/article.html?raw";
 import js from "../../../../shared/news-content/article.js?raw";
+import { useReadProgress } from "../hooks/use-read-progress";
+import classes from "./NewsEmbed.module.css";
+import { TocSidebar } from "./TocSidebar";
 
-interface NewsEmbedProps {
-	onShadowReady?: (shadow: ShadowRoot) => void;
-	darkMode?: boolean;
-}
-
-export function NewsEmbed({ onShadowReady, darkMode }: NewsEmbedProps) {
+export function NewsEmbed() {
 	const styleRef = useRef(document.createElement("style"));
 	const containerRef = useRef(document.createElement("div"));
 
 	const hostRef = useRef<HTMLDivElement | null>(null);
 	const shadowRef = useRef<ShadowRoot | null>(null);
-	const [, setShadowReady] = useState(false);
+	const [isRead, setIsRead] = useState(false);
+	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+	const isDark = colorScheme === "dark";
+	const { percentage } = useReadProgress(hostRef, "AA/123/1234/ZZ");
+	const isComplete = percentage === 100;
 
 	// TODO: Research if its better to use useLayoutEffect or useSyncExternalStore instead
 	useLayoutEffect(() => {
@@ -55,10 +74,7 @@ export function NewsEmbed({ onShadowReady, darkMode }: NewsEmbedProps) {
 			// this "activates" the JS
 			scriptFn(shadow, docProxy, window);
 		}
-
-		onShadowReady?.(shadow);
-		setShadowReady(true);
-	}, [onShadowReady]);
+	}, []);
 
 	// Toggle dark mode directly on the shadow DOM content
 	useEffect(() => {
@@ -67,13 +83,59 @@ export function NewsEmbed({ onShadowReady, darkMode }: NewsEmbedProps) {
 		const article = shadow.querySelector(".news-article");
 
 		if (article) {
-			article.classList.toggle("dark-mode", !!darkMode);
+			article.classList.toggle("dark-mode", !!isDark);
 		}
-	}, [darkMode]);
+	}, [isDark]);
 
 	return (
-		<Flex>
-			<div ref={hostRef} data-news-shadow-host style={{ minHeight: 200 }} />
-		</Flex>
+		<div>
+			<Box component="header" className={classes.toolbar}>
+				<Progress
+					value={percentage}
+					size={3}
+					color={isComplete ? "green" : "blue.7"}
+					className={classes.progressBar}
+				/>
+				<Button variant="subtle" leftSection={<IconArrowLeft size={18} />}>
+					Back
+				</Button>
+				<Group gap="lg">
+					<ActionIcon variant="subtle" color="blue.9" title="People">
+						<IconUsers size={20} />
+					</ActionIcon>
+					<ActionIcon variant="subtle" color="blue.9" title="Font size">
+						<IconTypography size={20} />
+					</ActionIcon>
+					<ActionIcon variant="subtle" color="blue.9" title="Like">
+						<IconThumbUp size={20} />
+					</ActionIcon>
+					<Button
+						size="xs"
+						color={isRead || isComplete ? "green" : "blue.8"}
+						onClick={() => setIsRead((r) => !r)}
+					>
+						{isRead || isComplete ? "✓ Read" : "Mark Read"}
+					</Button>
+					<ActionIcon
+						variant="subtle"
+						color="gray.8"
+						onClick={() => toggleColorScheme()}
+						title="Toggle dark mode"
+					>
+						{isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
+					</ActionIcon>
+				</Group>
+			</Box>
+			<Container size="md" p={0}>
+				<div className={classes.contentLayout}>
+					<Box className={classes.embedContainer}>
+						<Flex>
+							<div ref={hostRef} data-news-shadow-host />
+						</Flex>
+					</Box>
+					<TocSidebar shadowRef={shadowRef} />
+				</div>
+			</Container>
+		</div>
 	);
 }

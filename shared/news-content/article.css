@@ -392,7 +392,7 @@ a:hover {
 
 /* ===== Dark Mode ===== */
 .news-article.dark-mode {
-	background: #1a1a2e;
+	background: var(--mantine-color-dark-7);
 	color: #e0e0e0;
 }
 

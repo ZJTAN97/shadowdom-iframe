@@ -1,77 +1,43 @@
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { saveReadProgress } from "../api/progress";
 
-interface UseReadProgressResult {
-	percentage: number;
-	sectionsRead: string[];
-}
-
 export function useReadProgress(
-	shadowRef: RefObject<ShadowRoot | null>,
+	hostRef: RefObject<HTMLDivElement | null>,
 	articleId: string,
-): UseReadProgressResult {
+): { percentage: number } {
 	const [percentage, setPercentage] = useState(0);
-	const [sectionsRead, setSectionsRead] = useState<string[]>([]);
-	const readSetRef = useRef(new Set<string>());
 	const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
 	useEffect(() => {
-		const shadow = shadowRef.current;
-		if (!shadow) return;
+		const host = hostRef.current;
+		if (!host) return;
 
-		const sections = shadow.querySelectorAll("section[id]");
-		if (sections.length === 0) return;
+		const onScroll = () => {
+			const scrollTop = window.scrollY;
+			const maxScroll =
+				document.documentElement.scrollHeight - window.innerHeight;
+			const raw = maxScroll > 0 ? (scrollTop / maxScroll) * 100 : 0;
+			setPercentage(Math.min(100, Math.max(0, Math.round(raw))));
+		};
 
-		const totalSections = sections.length;
+		onScroll();
+		window.addEventListener("scroll", onScroll, { passive: true });
+		return () => window.removeEventListener("scroll", onScroll);
+	}, [hostRef]);
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				let changed = false;
-				for (const entry of entries) {
-					if (entry.isIntersecting) {
-						const id = entry.target.id;
-						if (!readSetRef.current.has(id)) {
-							readSetRef.current.add(id);
-							changed = true;
-						}
-					}
-				}
-
-				if (changed) {
-					const newPercentage = Math.round(
-						(readSetRef.current.size / totalSections) * 100,
-					);
-					const newSections = [...readSetRef.current];
-					setPercentage(newPercentage);
-					setSectionsRead(newSections);
-				}
-			},
-			{ threshold: 0.5 },
-		);
-
-		for (const section of sections) {
-			observer.observe(section);
-		}
-
-		return () => observer.disconnect();
-	}, [shadowRef]);
-
-	// Debounced API call when progress changes
 	useEffect(() => {
 		if (percentage === 0) return;
-
 		clearTimeout(debounceRef.current);
 		debounceRef.current = setTimeout(() => {
 			saveReadProgress({
 				articleId,
 				percentage,
-				sectionsRead,
 				lastUpdated: new Date().toISOString(),
 			});
-		}, 1000);
+		}, 500);
 
 		return () => clearTimeout(debounceRef.current);
-	}, [articleId, percentage, sectionsRead]);
+	}, [articleId, percentage]);
 
-	return { percentage, sectionsRead };
+	return { percentage };
 }

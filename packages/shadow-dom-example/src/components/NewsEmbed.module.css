@@ -6,8 +6,6 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: 0.6rem 1.5rem;
-	width: 100vw;
-	margin-left: calc(50% - 50vw);
 	background: light-dark(#fff, var(--mantine-color-dark-7));
 	border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }

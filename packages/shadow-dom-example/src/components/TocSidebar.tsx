@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import classes from "./TocSidebar.module.css";
 
-const entries = [
+export const entries = [
 	{
 		id: "article-meta",
 		label: "Cover",

@@ -91,8 +91,6 @@ If you are rendering a full document string inside a Shadow DOM, the browser eff
 
 ## Can Shadow DOM use Host App's CSS Variables and vice versa?
 
-- CSS Variables will it bleed?
+I can actually use mantine's css Variables.
 
-```css
-var(--color-black);
-```
+But actually I don't see how this will be an issue.
