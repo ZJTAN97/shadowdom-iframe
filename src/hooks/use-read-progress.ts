@@ -1,5 +1,4 @@
 import { type RefObject, useEffect, useRef, useState } from "react";
-import { saveReadProgress } from "../api/progress";
 
 export function useReadProgress(
 	hostRef: RefObject<HTMLDivElement | null>,
@@ -28,13 +27,6 @@ export function useReadProgress(
 	useEffect(() => {
 		if (percentage === 0) return;
 		clearTimeout(debounceRef.current);
-		debounceRef.current = setTimeout(() => {
-			saveReadProgress({
-				articleId,
-				percentage,
-				lastUpdated: new Date().toISOString(),
-			});
-		}, 500);
 
 		return () => clearTimeout(debounceRef.current);
 	}, [articleId, percentage]);
