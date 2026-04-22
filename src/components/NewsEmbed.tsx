@@ -23,6 +23,9 @@ import {
 	IconUsers,
 } from "@tabler/icons-react";
 import { useLayoutEffect, useRef, useState } from "react";
+import Lightbox, { type Slide } from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
 import css from "../../shared/news-content/article.css?raw";
 import html from "../../shared/news-content/article.html?raw";
 import js from "../../shared/news-content/article.js?raw";
@@ -37,6 +40,8 @@ export function NewsEmbed() {
 	const hostRef = useRef<HTMLDivElement | null>(null);
 	const shadowRef = useRef<ShadowRoot | null>(null);
 	const [isRead, setIsRead] = useState(false);
+	const [slides, setSlides] = useState<Slide[]>([]);
+	const [lightboxIndex, setLightboxIndex] = useState(-1);
 	const fontScaleRef = useRef(1);
 	const [fontModalOpened, { open: openFontModal, close: closeFontModal }] =
 		useDisclosure(false);
@@ -105,6 +110,31 @@ export function NewsEmbed() {
 			// this "activates" the JS
 			scriptFn(shadow, docProxy, window);
 		}
+
+		// Discover images in embedded doc, build slide list.
+		// Controls + index state live in host React — lightbox renders via portal to document.body.
+		const imgs = Array.from(shadow.querySelectorAll<HTMLImageElement>("img"));
+		const discovered: Slide[] = imgs.map((img) => ({
+			src: img.currentSrc || img.src,
+			alt: img.alt,
+			description: img.dataset.caption || img.alt || undefined,
+		}));
+		setSlides(discovered);
+
+		// Event delegation on shadow root — clicks bubble across shadow boundary
+		// but target is retargeted; use composedPath to find actual <img>.
+		const handleClick = (e: Event) => {
+			const path = e.composedPath();
+			const img = path.find(
+				(el): el is HTMLImageElement =>
+					el instanceof HTMLImageElement && imgs.includes(el),
+			);
+			if (!img) return;
+			e.preventDefault();
+			setLightboxIndex(imgs.indexOf(img));
+		};
+		shadow.addEventListener("click", handleClick);
+		return () => shadow.removeEventListener("click", handleClick);
 	}, []);
 
 	return (
@@ -226,6 +256,24 @@ export function NewsEmbed() {
 					</Flex>
 				</Stack>
 			</Modal>
+			<Lightbox
+				open={lightboxIndex >= 0}
+				index={lightboxIndex}
+				close={() => setLightboxIndex(-1)}
+				slides={slides}
+				plugins={[Zoom]}
+				zoom={{
+					maxZoomPixelRatio: 3,
+					zoomInMultiplier: 2,
+					doubleTapDelay: 300,
+					doubleClickDelay: 300,
+					doubleClickMaxStops: 2,
+					keyboardMoveDistance: 50,
+					wheelZoomDistanceFactor: 100,
+					pinchZoomDistanceFactor: 100,
+					scrollToZoom: true,
+				}}
+			/>
 		</div>
 	);
 }
