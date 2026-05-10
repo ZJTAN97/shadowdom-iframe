@@ -1,7 +1,7 @@
 import { NewsEmbed } from "./components/NewsEmbed";
 
 function App() {
-	return <NewsEmbed />;
+  return <NewsEmbed />;
 }
 
 export default App;

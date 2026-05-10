@@ -264,110 +264,83 @@
         </figure>
       </section>
 
-      <section id="section-two-column" class="two-column-section">
-        <h2 class="section-label">Perspectives Side by Side</h2>
-        <p class="section-header-label"><em>Two-column layout — test flex-wrap behaviour at larger font sizes</em></p>
-
-        <div class="two-column-grid">
-          <div class="two-column-item">
-            <h3 class="numbered-heading">Moscow's view</h3>
-            <p>
-              The Kremlin described the visit as a reaffirmation of the "no-limits"
-              partnership signed in early 2022. Officials highlighted increased
-              coordination on energy exports, yuan-denominated settlements, and
-              joint military exercises in the Pacific. Russian commentators framed
-              the trip as evidence that Western sanctions have failed to isolate
-              Moscow on the global stage.
-            </p>
-          </div>
-          <div class="two-column-item">
-            <h3 class="numbered-heading">Beijing's framing</h3>
-            <p>
-              Chinese state media emphasised stability, portraying the relationship
-              as a counterweight to what Beijing calls "bloc confrontation". Analysts
-              note that while rhetoric remains warm, China continues to avoid direct
-              material support for Russia's war effort, wary of secondary sanctions
-              and of jeopardising trade ties with Europe.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <hr class="section-divider" />
 
-      <section id="section-russian-dolls">
-        <p class="section-header-label"><em>Russian dolls and G.I Joes section header</em></p>
+      <section id="section-two-columns" class="cq-section">
+        <p class="section-header-label"><em>Container-query showcase — 2 columns collapse to 1 below 500px of host
+            container width</em></p>
 
-        <h3 class="numbered-heading">
-          4. Pushing for a greater involvement of China in peace talks since the early
-          days of the war, which marked its third anniversary in February. Pushing
-          for a greater involvement of China in peace talks since the early days of
-          the war, which marked its third anniversary in February. Pushing for a
-          greater involvement of China in peace talks since the early days of the
-          war, which marked its third anniversary in February.
-        </h3>
+        <h2 class="section-label">Bilateral Snapshot: Trade and Diplomacy</h2>
 
-        <ul class="article-list">
-          <li>
-            The Kremlin said on March 31 that Russia and the United States were
-            working on ideas for a possible peace settlement in Ukraine and on building
-            bilateral ties. Since taking office in January, Trump has shifted the U.S. to a
-            more conciliatory stance towards Russia. "(This) is good for stabilising the
-            balance of power between major powers and inspires optimism in a
-            disappointing international situation," RIA cited Mr Wang as saying.
-          </li>
-          <li>
-            Mr Wang also dismissed the notion that Mr Trump is trying to support
-            Russia in order to set it against China, condemning such ideas as a
-            "relapse of obsolete confrontational and bloc thinking".
-          </li>
-          <li>
-            Mr Wang said recent Ukraine ceasefire talks had already brought some
-            results and should continue, despite diverging views and the difficult
-            situation on the battlefield. "The step towards peace, although not that big,
-            is constructive - it's worth building on it," Mr Wang said. "With peace, it is no
-            pain no gain. You need to work hard to achieve it."
-          </li>
-        </ul>
-      </section>
+        <p class="cq-intro">
+          The two cards below are laid out with CSS Container Queries instead of viewport media queries. They reflow
+          based on the width of the embed host inside the shadow DOM, so the layout adapts even when this article is
+          dropped into a narrow sidebar without the browser itself being resized — useful for shadow DOM embeds whose
+          available width is decoupled from the viewport.
+        </p>
 
-
-      <section id="section-two-columns" class="container">
-        <div class="cHeader">
-          <h2>Below are 2 cols, that will switch to 1 col at width below 700px.
-        </div>
-        <div class="cGrid">
-          <div class="cGridCol Col1">
-            <h3>Columns</h3>
-            <p>In data organization, rows and columns serve as the fundamental coordinates for structuring information
-              within a grid or matrix. Rows are the horizontal arrangements that run from left to right, typically
-              representing a single record or a unique entity, such as an individual student in a grade book or a
-              specific transaction in a ledger. By grouping related data points horizontally, rows allow us to read a
-              complete "story" about one specific item across various attributes.</p>
+        <div class="cq-grid">
+          <article class="cq-col">
+            <h3>Trade gravity has shifted east</h3>
             <p>
-              Columns, conversely, are the vertical sequences that run from top to bottom, acting as the categories or
-              variables for the data set. Each column usually holds a specific type of information—like a date, a price,
-              or a name—that applies to every row in the grid. This vertical alignment is crucial for comparative
-              analysis, as it allows you to quickly scan down a list to find trends, calculate sums, or identify
-              outliers within a specific data field. Together, the intersection of a row and a column creates a cell,
-              the precise location where a unique piece of data resides.</p>
-          </div>
-          <div class="cGridCol Col2">
-            <h3>Rows</h3>
-            <p>In the realm of digital interfaces and web design, the relationship between rows and columns is governed
-              by layout engines and grid systems. Modern frameworks allow these structures to be fluid; for instance, on
-              a wide desktop screen, content might be arranged in multiple columns to maximize space, but on a mobile
-              device, those columns "stack" into rows to maintain readability. This responsiveness ensures that the
-              hierarchy of information remains intact regardless of the hardware, turning static tables into dynamic,
-              adaptable canvases.</p>
+              Customs data referenced earlier in this article shows China overtaking Germany and the United States as
+              Russia's leading import partner, with finished vehicle exports to Russia reaching 287,000 units — nearly
+              double the next destination. The trend underwrites the "no-limits" framing of Mr Wang's Moscow visit and
+              helps explain why sanctions have not dislodged the partnership.
+            </p>
             <p>
-              Beyond simple data entry, the mathematical application of these structures is found in linear algebra,
-              where rows and columns form the basis of a matrix. In this context, the orientation is vital for
-              operations like matrix multiplication, where the number of columns in the first matrix must match the
-              number of rows in the second. Whether you are calculating complex physics simulations or simply filtering
-              a spreadsheet, the intersection of these two axes provides the essential framework for navigating and
-              manipulating the world's information.</p>
-          </div>
+              Energy flows tell a similar story. Russian seaborne crude exports to China have climbed sharply since
+              early 2022, with discounted barrels routed through Pacific ports replacing volumes that previously
+              cleared Rotterdam and Hamburg. Yuan-denominated settlement, once a marginal experiment, now covers a
+              majority share of the bilateral commodity trade — a development the Kremlin frames as evidence of a
+              durable post-dollar corridor.
+            </p>
+            <p>
+              For Beijing the calculus is more pragmatic than ideological. Cheap energy and a captive market for
+              Chinese manufactured goods support the domestic growth target without exposing state banks to direct
+              sanctions risk, provided transactions stay clear of dual-use categories. Analysts note that the most
+              politically sensitive trade lines — semiconductors, machine tools with military applications — remain
+              tightly throttled.
+            </p>
+            <ul class="article-list">
+              <li>23.7% — China's share of Russian imports in 2020, up from low single digits at the start of the
+                century.</li>
+              <li>287,000 finished vehicles shipped from China to Russia in the first five months of 2023.</li>
+              <li>40+ — number of Xi–Putin meetings over the past decade, per Chinese state media.</li>
+            </ul>
+          </article>
+
+          <article class="cq-col">
+            <h3>Diplomatic ambiguity remains</h3>
+            <p>
+              Despite the warm rhetoric, Beijing has so far declined to provide direct material support for Russia's
+              war effort, mindful of secondary sanctions and its trade exposure to Europe. Mr Wang's call to
+              "eradicate the causes of the crisis through dialogue" signals continued positioning as a mediator rather
+              than a co-belligerent.
+            </p>
+            <p>
+              That posture is reinforced by the joint China–Brazil framework circulated last year, which floated
+              general principles for ending the conflict without naming an aggressor or proposing territorial terms.
+              Western capitals received the document tepidly; Moscow welcomed its non-prescriptive tone. The drafting
+              choice — broad enough to be acceptable, narrow enough to be unactionable — is consistent with Beijing's
+              broader pattern of agenda-setting through procedural neutrality.
+            </p>
+            <p>
+              Wang's framing in the RIA interview hints at how Beijing wants the next phase read: peace as a process,
+              not a settlement; major powers as stabilisers rather than guarantors; and bilateral coordination with
+              Moscow as a precondition for any durable outcome. None of those formulations commits China to specific
+              concessions, but each constrains how Washington and Brussels can characterise the partnership going
+              forward.
+            </p>
+            <ul class="article-list">
+              <li>"Friends forever, never enemies" — Wang Yi to RIA, framed as a "solid legal basis" for cooperation.
+              </li>
+              <li>No public commitment of lethal aid; dual-use export controls reportedly tightened on select
+                categories.</li>
+              <li>Continued advocacy for a negotiated track, in coordination with Brazil and select Global South
+                partners.</li>
+            </ul>
+          </article>
         </div>
       </section>
 

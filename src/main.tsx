@@ -7,9 +7,9 @@ import App from "./App";
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
 createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<MantineProvider defaultColorScheme="light">
-			<App />
-		</MantineProvider>
-	</StrictMode>,
+  <StrictMode>
+    <MantineProvider defaultColorScheme="light">
+      <App />
+    </MantineProvider>
+  </StrictMode>,
 );

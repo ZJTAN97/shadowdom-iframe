@@ -1,47 +1,47 @@
 .toolbar {
-	position: sticky;
-	top: 0;
-	z-index: 100;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0.6rem 1.5rem;
-	background: light-dark(#fff, var(--mantine-color-dark-7));
-	border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1.5rem;
+  background: light-dark(#fff, var(--mantine-color-dark-7));
+  border-bottom: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
 }
 
 .progressBar {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .contentLayout {
-	display: flex;
-	align-items: flex-start;
+  display: flex;
+  align-items: flex-start;
 }
 
 .embedContainer {
-	flex: 1;
-	min-width: 0;
-	background: light-dark(#fff, var(--mantine-color-dark-7));
-	overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  background: light-dark(#fff, var(--mantine-color-dark-7));
+  overflow: hidden;
 }
 
 .backToTop {
-	cursor: pointer;
-	position: fixed;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	right: 2rem;
-	top: 50%;
-	transform: translateY(-50%);
+  cursor: pointer;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 @media (max-width: $mantine-breakpoint-sm) {
-	.toolbar {
-		padding: 0.5rem 1rem;
-	}
+  .toolbar {
+    padding: 0.5rem 1rem;
+  }
 }

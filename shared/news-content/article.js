@@ -4,5 +4,5 @@
  */
 
 (() => {
-	// No-op: article JS placeholder
+  // No-op: article JS placeholder
 })();
