@@ -42,7 +42,7 @@ export function NewsEmbed() {
 
 	const hostRef = useRef<HTMLDivElement | null>(null);
 	const shadowRef = useRef<ShadowRoot | null>(null);
-	const [isRead, setIsRead] = useState(false);
+	const imgsRef = useRef<HTMLImageElement[]>([]);
 	const [slides, setSlides] = useState<Slide[]>([]);
 	const [lightboxIndex, setLightboxIndex] = useState(-1);
 	const fontScaleRef = useRef(1);
@@ -52,7 +52,6 @@ export function NewsEmbed() {
 	const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 	const isDark = colorScheme === "dark";
 	const { percentage } = useReadProgress(hostRef, "AA/123/1234/ZZ");
-	const isComplete = percentage === 100;
 
 	const applyFontScale = (scale: number) => {
 		fontScaleRef.current = scale;
@@ -73,60 +72,59 @@ export function NewsEmbed() {
 
 	useLayoutEffect(() => {
 		const host = hostRef.current;
-		if (!host || shadowRef.current) return;
+		if (!host) return;
 
-		const shadow = host.attachShadow({ mode: "open" });
-		shadowRef.current = shadow;
+		// One-time shadow attach + content injection. Shadow roots cannot be
+		// detached, so this guard must persist across StrictMode remounts.
+		if (!shadowRef.current) {
+			const shadow = host.attachShadow({ mode: "open" });
+			shadowRef.current = shadow;
 
-		// Inject styles
-		styleRef.current.textContent = `${css} section { scroll-margin-top: 75px; }`;
+			styleRef.current.textContent = `${css} section { scroll-margin-top: 75px; }`;
+			shadow.appendChild(styleRef.current);
 
-		shadow.appendChild(styleRef.current);
+			containerRef.current.innerHTML = html;
+			shadow.appendChild(containerRef.current);
 
-		// Inject HTML
-		containerRef.current.innerHTML = html;
-		shadow.appendChild(containerRef.current);
+			applyDarkMode(isDark);
 
-		// Apply initial dark mode state; subsequent toggles update the shadow DOM
-		// imperatively via handleToggleColorScheme.
-		applyDarkMode(isDark);
+			// Execute external JS with a document proxy that scopes DOM queries to the shadow root
+			// this is the "contract" we will need to discuss cross teams, basically what APIs are we gona define instead of us trying to catch all
+			if (js) {
+				const scriptFn = new Function("shadowRoot", "document", "window", js);
+				const docProxy = new Proxy(document, {
+					get(target, prop) {
+						if (prop === "querySelector")
+							return shadow.querySelector.bind(shadow);
+						if (prop === "querySelectorAll")
+							return shadow.querySelectorAll.bind(shadow);
+						if (prop === "body") return shadow;
+						const val = Reflect.get(target, prop);
+						return typeof val === "function" ? val.bind(target) : val;
+					},
+				});
+				scriptFn(shadow, docProxy, window);
+			}
 
-		// Execute external JS with a document proxy that scopes DOM queries to the shadow root
-		// this is the "contract" we will need to discuss cross teams, basically what APIs are we gona define instead of us trying to catch all
-		if (js) {
-			const scriptFn = new Function("shadowRoot", "document", "window", js);
-
-			const docProxy = new Proxy(document, {
-				// The 'get' trap intercepts property access
-				get(target, prop) {
-					if (prop === "querySelector")
-						return shadow.querySelector.bind(shadow);
-					if (prop === "querySelectorAll")
-						return shadow.querySelectorAll.bind(shadow);
-					if (prop === "body") return shadow;
-					const val = Reflect.get(target, prop);
-					return typeof val === "function" ? val.bind(target) : val;
-				},
-			});
-
-			// this "activates" the JS
-			scriptFn(shadow, docProxy, window);
+			const imgs = Array.from(
+				shadow.querySelectorAll<HTMLImageElement>("img"),
+			);
+			imgsRef.current = imgs;
+			setSlides(
+				imgs.map((img) => ({
+					src: img.currentSrc || img.src,
+					alt: img.alt,
+					description: img.dataset.caption || img.alt || undefined,
+				})),
+			);
 		}
 
-		// Discover images in embedded doc, build slide list.
-		// Controls + index state live in host React — lightbox renders via portal to document.body.
-		const imgs = Array.from(shadow.querySelectorAll<HTMLImageElement>("img"));
-		const discovered: Slide[] = imgs.map((img) => ({
-			src: img.currentSrc || img.src,
-			alt: img.alt,
-			description: img.dataset.caption || img.alt || undefined,
-		}));
-		setSlides(discovered);
-
-		// Event delegation on shadow root — clicks bubble across shadow boundary
-		// but target is retargeted; use composedPath to find actual <img>.
+		// Listener (re)bound every effect run so StrictMode cleanup → remount
+		// does not leave the shadow root without a click handler.
+		const shadow = shadowRef.current;
 		const handleClick = (e: Event) => {
 			const path = e.composedPath();
+			const imgs = imgsRef.current;
 			const img = path.find(
 				(el): el is HTMLImageElement =>
 					el instanceof HTMLImageElement && imgs.includes(el),
